@@ -1,0 +1,52 @@
+# LEARNING REFERENCE ONLY: illustrative legacy Cortex Analyst semantic-model YAML.
+# This is not the DDL source for the native semantic view created in sql/02_semantic_view.sql.
+# Legacy model schemas and native semantic-view YAML specifications have distinct formats.
+name: supplier_delivery_legacy_learning_model
+description: Synthetic supplier delivery analytics model
+tables:
+  - name: deliveries
+    description: One row per supplier delivery record.
+    base_table:
+      database: MSI_COPILOT
+      schema: ANALYTICS
+      table: VW_SUPPLIER_DELIVERY_ANALYTICS
+    dimensions:
+      - name: supplier_name
+        description: Supplier company name.
+        expr: SUPPLIER_NAME
+        data_type: TEXT
+        synonyms: [supplier, vendor]
+      - name: plant_name
+        description: Receiving manufacturing plant.
+        expr: PLANT_NAME
+        data_type: TEXT
+        synonyms: [plant, factory]
+      - name: promised_month
+        description: Month of promised delivery.
+        expr: PROMISED_MONTH
+        data_type: DATE
+      - name: part_number
+        description: Manufacturing part identifier.
+        expr: PART_NUMBER
+        data_type: TEXT
+    time_dimensions:
+      - name: promised_date
+        description: Promised delivery date.
+        expr: PROMISED_DATE
+        data_type: DATE
+    facts:
+      - name: on_time_flag
+        description: 1 if delivered on time; otherwise 0.
+        expr: ON_TIME_FLAG
+        data_type: NUMBER
+      - name: delay_days
+        description: Calendar days late, zero for on-time deliveries.
+        expr: DELAY_DAYS
+        data_type: NUMBER
+    metrics:
+      - name: on_time_delivery_pct
+        description: Percentage of deliveries on time.
+        expr: 100.0 * SUM(ON_TIME_FLAG) / NULLIF(COUNT(DELIVERY_ID), 0)
+      - name: average_delay_days
+        description: Average delay days, including zero for on-time deliveries.
+        expr: AVG(DELAY_DAYS)
